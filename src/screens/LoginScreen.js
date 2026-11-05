@@ -1,165 +1,119 @@
 import React, { useState } from 'react';
-import { 
-  StyleSheet, 
-  Text, 
-  View, 
-  TextInput, 
-  TouchableOpacity, 
-  Alert, 
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform
-} from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 
-export default function LoginScreen() {
+export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    // 1. Validar que no dejen campos vacíos
     if (!email || !password) {
-      Alert.alert('Atención', 'Por favor ingresa tu correo y contraseña.');
+      Alert.alert('Error', 'Por favor ingresa tu correo y contraseña.');
       return;
     }
 
-    try {   
+    try {
       setLoading(true);
-      
-      // 2. Enviar los datos por internet a la IP de tu PC donde corre el backend
+
+      // Enviar los datos por internet a la IP de tu PC donde corre el backend
       const response = await axios.post('http://192.168.110.5:3000/api/auth/login', {
         email: email,
         password: password
       });
 
       setLoading(false);
-      
-      // 3. Si la clave y correo existen en la base de datos:
+
+      // Si la clave y correo existen en la base de datos:
       Alert.alert('¡Bienvenido!', 'Inicio de sesión exitoso.');
       console.log('Respuesta del servidor:', response.data);
 
+      // Aquí puedes agregar la navegación a la siguiente pantalla si lo deseas
+      // navigation.navigate('Home');
+
     } catch (error) {
       setLoading(false);
-      console.error(error);
+      console.error('Error al iniciar sesión:', error);
       
-      // 4. Si la clave está mal o el servidor de Node.js está apagado:
-      Alert.alert(
-        'Error de conexión', 
-        'No se pudo conectar con el servidor. Revisa que tu backend en Node.js esté encendido o que el correo/clave sean correctos.'
-      );
+      const errorMessage = error.response?.data?.message || 'No se pudo conectar con el servidor. Verifica tu red.';
+      Alert.alert('Error de autenticación', errorMessage);
     }
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <View style={styles.card}>
-        <Text style={styles.brandTitle}>TechVision</Text>
-        <Text style={styles.subtitle}>Inicia sesión en tu cuenta</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>TechniVision</Text>
+      <Text style={styles.subtitle}>Inicia sesión para continuar</Text>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Correo Electrónico</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="ejemplo@techvision.com"
-            placeholderTextColor="#666"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-          />
-        </View>
+      <TextInput
+        style={styles.input}
+        placeholder="Correo electrónico"
+        placeholderTextColor="#888"
+        keyboardType="email-address"
+        autoCapitalize="none"
+        value={email}
+        onChangeText={setEmail}
+      />
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Contraseña</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="••••••••"
-            placeholderTextColor="#666"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
-        </View>
+      <TextInput
+        style={styles.input}
+        placeholder="Contraseña"
+        placeholderTextColor="#888"
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+      />
 
-        <TouchableOpacity 
-          style={styles.button} 
-          onPress={handleLogin}
-          disabled={loading}
-          activeOpacity={0.8}
-        >
-          {loading ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
-            <Text style={styles.buttonText}>Ingresar</Text>
-          )}
-        </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
+      <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Entrar</Text>
+        )}
+      </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
     justifyContent: 'center',
-    paddingHorizontal: 20,
+    padding: 20,
+    backgroundColor: '#f5f5f5',
   },
-  card: {
-    backgroundColor: '#1E293B',
-    borderRadius: 16,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  brandTitle: {
-    fontSize: 30,
+  title: {
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#38BDF8',
     textAlign: 'center',
-    marginBottom: 4,
+    marginBottom: 5,
+    color: '#333',
   },
   subtitle: {
-    fontSize: 14,
-    color: '#94A3B8',
+    fontSize: 16,
     textAlign: 'center',
-    marginBottom: 24,
-  },
-  inputContainer: {
-    marginBottom: 16,
-  },
-  label: {
-    color: '#E2E8F0',
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 6,
+    marginBottom: 30,
+    color: '#666',
   },
   input: {
-    backgroundColor: '#0F172A',
-    color: '#FFFFFF',
-    paddingHorizontal: 16,
+    backgroundColor: '#fff',
+    paddingHorizontal: 15,
     paddingVertical: 12,
     borderRadius: 8,
-    fontSize: 15,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#ddd',
+    marginBottom: 15,
+    fontSize: 16,
   },
   button: {
-    backgroundColor: '#0284C7',
-    paddingVertical: 14,
+    backgroundColor: '#007AFF',
+    padding: 15,
     borderRadius: 8,
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: 10,
   },
   buttonText: {
-    color: '#FFFFFF',
+    color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
   },
